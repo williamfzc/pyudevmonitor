@@ -24,7 +24,7 @@ class UDevMonitor(object):
         logger.info("udevadm process up")
 
         # ignore unused header
-        self.read_event()
+        self.read_event(drop=True)
 
     def stop(self):
         if self._process and self.is_running():
@@ -40,10 +40,12 @@ class UDevMonitor(object):
     def read_line(self) -> str:
         return self._process.stdout.readline().decode("utf-8")
 
-    def read_event(self) -> UEvent:
+    def read_event(self, drop: bool = None) -> typing.Optional[UEvent]:
         event_content = []
         new_line = self.read_line().strip()
         while new_line:
             event_content.append(new_line)
             new_line = self.read_line().strip()
+        if drop:
+            return None
         return UEvent(event_content)

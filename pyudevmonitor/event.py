@@ -1,5 +1,6 @@
 import typing
 import json
+from loguru import logger
 
 
 class UEvent(object):
@@ -7,6 +8,7 @@ class UEvent(object):
 
     def __init__(self, udev_info_list: typing.List[str]):
         for each_arg in udev_info_list[1:]:
+            logger.debug(each_arg)
             name, value = each_arg.split("=")
             self.__dict__[name] = value
 
