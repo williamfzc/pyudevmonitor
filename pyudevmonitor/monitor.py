@@ -2,6 +2,7 @@ import subprocess
 import time
 import typing
 from loguru import logger
+import threading
 
 from pyudevmonitor.event import UEvent
 
@@ -49,3 +50,19 @@ class UDevMonitor(object):
         if drop:
             return None
         return UEvent(event_content)
+
+    def loop_read(self, to: typing.List[UEvent]) -> typing.Callable:
+        stop: bool = False
+
+        def loop():
+            while not stop:
+                new = self.read_event()
+                to.append(new)
+            logger.info("loop read stopped")
+
+        def stop_loop():
+            nonlocal stop
+            stop = True
+
+        threading.Thread(target=loop).start()
+        return stop_loop
