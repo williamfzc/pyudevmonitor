@@ -3,6 +3,7 @@ import time
 import typing
 from loguru import logger
 import threading
+import queue
 
 from pyudevmonitor.event import UEvent
 
@@ -51,13 +52,14 @@ class UDevMonitor(object):
             return None
         return UEvent(event_content)
 
-    def loop_read(self, to: typing.List[UEvent]) -> typing.Callable:
+    def loop_read(self, to: queue.Queue) -> typing.Callable:
         stop: bool = False
 
         def loop():
             while not stop:
                 new = self.read_event()
-                to.append(new)
+                if not new.is_empty():
+                    to.put(new)
             logger.info("loop read stopped")
 
         def stop_loop():
