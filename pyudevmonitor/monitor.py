@@ -63,6 +63,7 @@ class UDevMonitor(object):
         def stop_loop():
             nonlocal stop
             stop = True
+            self.stop()
 
         threading.Thread(target=loop).start()
         return stop_loop
