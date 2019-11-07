@@ -10,6 +10,8 @@ from pyudevmonitor.event import UEvent
 
 class UDevMonitor(object):
     """ udevadm process management """
+    CHARSET = "utf-8"
+
     def __init__(self, monitor_args: typing.List[str] = None, encoding: str = None):
         self.monitor_args: typing.List[str] = monitor_args or ["-u", "--subsystem-match=usb", "--environment"]
         self.encoding: str = encoding or "utf-8"
@@ -17,8 +19,9 @@ class UDevMonitor(object):
         self._process: typing.Optional[subprocess.Popen] = None
 
     def start(self):
+        udevadm = subprocess.check_output(['which', 'udevadm']).decode(self.CHARSET).strip()
         self._process = subprocess.Popen(
-            ["udevadm", "monitor", "-u", *self.monitor_args],
+            [udevadm, "monitor", "-u", *self.monitor_args],
             stdout=subprocess.PIPE,
         )
         time.sleep(1)
@@ -40,7 +43,7 @@ class UDevMonitor(object):
         return not bool(self._process.poll())
 
     def read_line(self) -> str:
-        return self._process.stdout.readline().decode("utf-8")
+        return self._process.stdout.readline().decode(self.CHARSET)
 
     def read_event(self, drop: bool = None) -> typing.Optional[UEvent]:
         event_content = []
